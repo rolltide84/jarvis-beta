@@ -4,37 +4,39 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0f172a">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>JARVIS - AI Task Prioritizer</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <!-- Load lucide as a global module -->
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 </head>
 <body>
   <div id="root"></div>
   
   <script type="text/babel">
     const { useState, useEffect, useCallback } = React;
-    
-    // Create icon components from lucide
-    const Shield = (props) => lucide.createElement(lucide.Shield, props);
-    const Lock = (props) => lucide.createElement(lucide.Lock, props);
-    const Brain = (props) => lucide.createElement(lucide.Brain, props);
-    const Clock = (props) => lucide.createElement(lucide.Clock, props);
-    const AlertCircle = (props) => lucide.createElement(lucide.AlertCircle, props);
-    const Check = (props) => lucide.createElement(lucide.Check, props);
-    const Plus = (props) => lucide.createElement(lucide.Plus, props);
-    const Settings = (props) => lucide.createElement(lucide.Settings, props);
-    const X = (props) => lucide.createElement(lucide.X, props);
-    const Eye = (props) => lucide.createElement(lucide.Eye, props);
-    const Trash2 = (props) => lucide.createElement(lucide.Trash2, props);
-    const Download = (props) => lucide.createElement(lucide.Download, props);
-    const Bell = (props) => lucide.createElement(lucide.Bell, props);
-    const Calendar = (props) => lucide.createElement(lucide.Calendar, props);
+
+    // Simple icon components using inline SVG
+    const Icon = ({ d, ...props }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        {typeof d === 'string' ? <path d={d} /> : d}
+      </svg>
+    );
+
+    const Shield = (props) => <Icon {...props} d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />;
+    const Lock = (props) => <Icon {...props} d={["M21 12a9 9 0 1 1-6.219-8.56", <circle cx="12" cy="12" r="3" key="1" />]} />;
+    const Brain = (props) => <Icon {...props} d={["M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z", "M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"]} />;
+    const Clock = (props) => <Icon {...props} d={["M12 2v4", "M12 18v4", "M4.93 4.93l2.83 2.83", "M16.24 16.24l2.83 2.83", "M2 12h4", "M18 12h4", "M4.93 19.07l2.83-2.83", "M16.24 7.76l2.83-2.83", <circle cx="12" cy="12" r="6" key="c" />]} />;
+    const AlertCircle = (props) => <Icon {...props} d={[<circle cx="12" cy="12" r="10" key="1" />, "M12 8v4", "M12 16h.01"]} />;
+    const Check = (props) => <Icon {...props} d="M20 6 9 17l-5-5" />;
+    const Plus = (props) => <Icon {...props} d={["M5 12h14", "M12 5v14"]} />;
+    const Settings = (props) => <Icon {...props} d={[<circle cx="12" cy="12" r="3" key="1" />, "M12 1v6", "M12 17v6", "M3.34 6.34l4.24 4.24", "M16.42 16.42l4.24 4.24", "M1 12h6", "M17 12h6", "M3.34 17.66l4.24-4.24", "M16.42 7.58l4.24-4.24"]} />;
+    const X = (props) => <Icon {...props} d={["M18 6 6 18", "M6 6l12 12"]} />;
+    const Eye = (props) => <Icon {...props} d={["M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z", <circle cx="12" cy="12" r="3" key="1" />]} />;
+    const Trash2 = (props) => <Icon {...props} d={["M3 6h18", "M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6", "M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2", "M10 11v6", "M14 11v6"]} />;
+    const Download = (props) => <Icon {...props} d={["M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", "M7 10l5 5 5-5", "M12 15V3"]} />;
+    const Bell = (props) => <Icon {...props} d={["M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9", "M10.3 21a1.94 1.94 0 0 0 3.4 0"]} />;
+    const Calendar = (props) => <Icon {...props} d={["M8 2v4", "M16 2v4", "M3 10h18", <rect width="18" height="18" x="3" y="4" rx="2" key="1" />]} />;
 
     const TIME_OF_DAY = ['morning', 'afternoon', 'evening', 'night'];
     const TASK_TAGS = ['deep_work', 'calls', 'emails', 'meetings', 'creative', 'admin', 'urgent'];
@@ -471,7 +473,7 @@ Completion Count: ${task.completionCount}
         return (
           <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
             <div className="text-white text-xl flex items-center gap-3">
-              <Lock className="animate-pulse" />
+              <Lock className="w-6 h-6 animate-pulse" />
               <span>Initializing secure storage...</span>
             </div>
           </div>
