@@ -11,14 +11,30 @@
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://unpkg.com/lucide-react@0.263.1/dist/umd/lucide-react.js"></script>
+  <!-- Load lucide as a global module -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 </head>
 <body>
   <div id="root"></div>
   
   <script type="text/babel">
     const { useState, useEffect, useCallback } = React;
-    const { Shield, Lock, Brain, Clock, AlertCircle, Check, Plus, Settings, X, Eye, Trash2, Download, Bell, Calendar } = lucide;
+    
+    // Create icon components from lucide
+    const Shield = (props) => lucide.createElement(lucide.Shield, props);
+    const Lock = (props) => lucide.createElement(lucide.Lock, props);
+    const Brain = (props) => lucide.createElement(lucide.Brain, props);
+    const Clock = (props) => lucide.createElement(lucide.Clock, props);
+    const AlertCircle = (props) => lucide.createElement(lucide.AlertCircle, props);
+    const Check = (props) => lucide.createElement(lucide.Check, props);
+    const Plus = (props) => lucide.createElement(lucide.Plus, props);
+    const Settings = (props) => lucide.createElement(lucide.Settings, props);
+    const X = (props) => lucide.createElement(lucide.X, props);
+    const Eye = (props) => lucide.createElement(lucide.Eye, props);
+    const Trash2 = (props) => lucide.createElement(lucide.Trash2, props);
+    const Download = (props) => lucide.createElement(lucide.Download, props);
+    const Bell = (props) => lucide.createElement(lucide.Bell, props);
+    const Calendar = (props) => lucide.createElement(lucide.Calendar, props);
 
     const TIME_OF_DAY = ['morning', 'afternoon', 'evening', 'night'];
     const TASK_TAGS = ['deep_work', 'calls', 'emails', 'meetings', 'creative', 'admin', 'urgent'];
@@ -390,11 +406,11 @@ Completion Count: ${task.completionCount}
       const toggleNotifications = async () => {
         if (!settings.notificationsEnabled) {
           if (!('Notification' in window)) {
-            alert('❌ Notifications are not supported in your browser. Try using Chrome, Firefox, Safari, or Edge.');
+            alert('❌ Notifications are not supported in your browser.');
             return;
           }
           if (Notification.permission === 'denied') {
-            alert('🔒 Notifications are blocked. Please enable them in your browser settings:\n\n• Click the lock/info icon in the address bar\n• Find "Notifications" and set to "Allow"');
+            alert('🔒 Notifications are blocked. Enable them in browser settings.');
             return;
           }
           try {
@@ -403,13 +419,10 @@ Completion Count: ${task.completionCount}
               const newSettings = {...settings, notificationsEnabled: true};
               setSettings(newSettings);
               saveSettings(newSettings);
-              notificationManager.notify('✅ JARVIS Notifications Enabled!', 'You will now receive alerts when tasks are almost due.', 'test-notification');
-            } else {
-              alert('⚠️ Notification permission was denied. You can enable it later in your browser settings.');
+              notificationManager.notify('✅ JARVIS Notifications Enabled!', 'You will now receive alerts.', 'test');
             }
           } catch (error) {
-            console.error('Notification error:', error);
-            alert('❌ Failed to enable notifications. Please check your browser settings.');
+            alert('❌ Failed to enable notifications.');
           }
         } else {
           const newSettings = {...settings, notificationsEnabled: false};
@@ -485,7 +498,7 @@ Completion Count: ${task.completionCount}
                       <span className="text-blue-300">Alerts On</span>
                     </div>
                   )}
-                  <button onClick={downloadCompletedLog} className="p-2 hover:bg-slate-700 rounded-lg transition-colors" title="Download completed tasks log">
+                  <button onClick={downloadCompletedLog} className="p-2 hover:bg-slate-700 rounded-lg transition-colors">
                     <Download className="w-5 h-5" />
                   </button>
                   <button onClick={() => setShowSettings(!showSettings)} className="p-2 hover:bg-slate-700 rounded-lg transition-colors">
@@ -509,60 +522,7 @@ Completion Count: ${task.completionCount}
               </div>
             </div>
 
-            {showSettings && (
-              <div className="bg-slate-800 rounded-lg p-6 mb-6 border border-slate-700">
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <Settings className="w-5 h-5" />
-                  Settings
-                </h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <span>Enable Notifications</span>
-                        {!('Notification' in window) && <span className="text-xs text-red-400">(Not supported)</span>}
-                        {('Notification' in window) && Notification.permission === 'denied' && <span className="text-xs text-yellow-400">(Blocked in browser)</span>}
-                      </div>
-                      <input type="checkbox" checked={settings.notificationsEnabled} onChange={toggleNotifications} disabled={!('Notification' in window)} className="w-5 h-5" />
-                    </label>
-                    <p className="text-sm text-slate-400">
-                      Get notified when tasks are almost due
-                      {('Notification' in window) && Notification.permission === 'denied' && <span className="block text-yellow-400 mt-1">⚠️ Unblock notifications in your browser settings to use this feature</span>}
-                    </p>
-                  </div>
-                  {settings.notificationsEnabled && (
-                    <div>
-                      <label className="block mb-2">Notify me {settings.notificationMinutes} minutes before deadline</label>
-                      <input type="range" min="15" max="180" step="15" value={settings.notificationMinutes} onChange={(e) => { const newSettings = {...settings, notificationMinutes: parseInt(e.target.value)}; setSettings(newSettings); saveSettings(newSettings); }} className="w-full" />
-                    </div>
-                  )}
-                  <div>
-                    <label className="flex items-center justify-between mb-2">
-                      <span>Enable Adaptive Learning</span>
-                      <input type="checkbox" checked={settings.enableAdaptive} onChange={(e) => { const newSettings = {...settings, enableAdaptive: e.target.checked}; setSettings(newSettings); saveSettings(newSettings); }} className="w-5 h-5" />
-                    </label>
-                    <p className="text-sm text-slate-400">Learn from your task choices to improve rankings over time</p>
-                  </div>
-                  {settings.enableAdaptive && (
-                    <div>
-                      <label className="block mb-2">Adaptive Influence: {Math.round((1 - settings.adaptiveAlpha) * 100)}%</label>
-                      <input type="range" min="0" max="1" step="0.1" value={settings.adaptiveAlpha} onChange={(e) => { const newSettings = {...settings, adaptiveAlpha: parseFloat(e.target.value)}; setSettings(newSettings); saveSettings(newSettings); }} className="w-full" />
-                      <p className="text-sm text-slate-400 mt-1">Balance between rule-based (left) and learned preferences (right)</p>
-                    </div>
-                  )}
-                  <div>
-                    <label className="block mb-2">Available Time (minutes): {context.availableMins}</label>
-                    <input type="range" min="15" max="240" step="15" value={context.availableMins} onChange={(e) => setContext({...context, availableMins: parseInt(e.target.value)})} className="w-full" />
-                  </div>
-                  <div>
-                    <label className="flex items-center justify-between">
-                      <span>Show Ranking Explanations</span>
-                      <input type="checkbox" checked={settings.explainRankings} onChange={(e) => { const newSettings = {...settings, explainRankings: e.target.checked}; setSettings(newSettings); saveSettings(newSettings); }} className="w-5 h-5" />
-                    </label>
-                  </div>
-                </div>
-              </div>
-            )}
+            {showSettings && <SettingsPanel settings={settings} setSettings={setSettings} saveSettings={saveSettings} toggleNotifications={toggleNotifications} context={context} setContext={setContext} />}
 
             <button onClick={() => setShowAddTask(!showAddTask)} className="w-full bg-blue-600 hover:bg-blue-700 rounded-lg p-4 mb-6 flex items-center justify-center gap-2 transition-colors">
               <Plus className="w-5 h-5" />
@@ -596,6 +556,53 @@ Completion Count: ${task.completionCount}
       );
     }
 
+    function SettingsPanel({ settings, setSettings, saveSettings, toggleNotifications, context, setContext }) {
+      return (
+        <div className="bg-slate-800 rounded-lg p-6 mb-6 border border-slate-700">
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <Settings className="w-5 h-5" />
+            Settings
+          </h2>
+          <div className="space-y-4">
+            <div>
+              <label className="flex items-center justify-between mb-2">
+                <span>Enable Notifications</span>
+                <input type="checkbox" checked={settings.notificationsEnabled} onChange={toggleNotifications} className="w-5 h-5" />
+              </label>
+            </div>
+            {settings.notificationsEnabled && (
+              <div>
+                <label className="block mb-2">Notify me {settings.notificationMinutes} minutes before</label>
+                <input type="range" min="15" max="180" step="15" value={settings.notificationMinutes} onChange={(e) => { const newSettings = {...settings, notificationMinutes: parseInt(e.target.value)}; setSettings(newSettings); saveSettings(newSettings); }} className="w-full" />
+              </div>
+            )}
+            <div>
+              <label className="flex items-center justify-between mb-2">
+                <span>Enable Adaptive Learning</span>
+                <input type="checkbox" checked={settings.enableAdaptive} onChange={(e) => { const newSettings = {...settings, enableAdaptive: e.target.checked}; setSettings(newSettings); saveSettings(newSettings); }} className="w-5 h-5" />
+              </label>
+            </div>
+            {settings.enableAdaptive && (
+              <div>
+                <label className="block mb-2">Adaptive Influence: {Math.round((1 - settings.adaptiveAlpha) * 100)}%</label>
+                <input type="range" min="0" max="1" step="0.1" value={settings.adaptiveAlpha} onChange={(e) => { const newSettings = {...settings, adaptiveAlpha: parseFloat(e.target.value)}; setSettings(newSettings); saveSettings(newSettings); }} className="w-full" />
+              </div>
+            )}
+            <div>
+              <label className="block mb-2">Available Time: {context.availableMins} mins</label>
+              <input type="range" min="15" max="240" step="15" value={context.availableMins} onChange={(e) => setContext({...context, availableMins: parseInt(e.target.value)})} className="w-full" />
+            </div>
+            <div>
+              <label className="flex items-center justify-between">
+                <span>Show Explanations</span>
+                <input type="checkbox" checked={settings.explainRankings} onChange={(e) => { const newSettings = {...settings, explainRankings: e.target.checked}; setSettings(newSettings); saveSettings(newSettings); }} className="w-5 h-5" />
+              </label>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     function TaskForm({ onAdd, onCancel }) {
       const [formData, setFormData] = useState({ title: '', urgency: 3, effortMins: 60, dueAt: null, tags: [] });
       const handleSubmit = () => {
@@ -612,7 +619,7 @@ Completion Count: ${task.completionCount}
           <div className="space-y-4">
             <div>
               <label className="block mb-2 text-sm font-medium">Task Title</label>
-              <input type="text" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="What needs to be done?" />
+              <input type="text" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2" placeholder="What needs to be done?" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -625,23 +632,22 @@ Completion Count: ${task.completionCount}
               </div>
             </div>
             <div>
-              <label className="block mb-2 text-sm font-medium">Complete By (Date & Time)</label>
-              <input type="datetime-local" onChange={(e) => setFormData({...formData, dueAt: e.target.value ? new Date(e.target.value).getTime() : null})} className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none" />
-              <p className="text-xs text-slate-400 mt-1">Set when this task must be completed</p>
+              <label className="block mb-2 text-sm font-medium">Complete By</label>
+              <input type="datetime-local" onChange={(e) => setFormData({...formData, dueAt: e.target.value ? new Date(e.target.value).getTime() : null})} className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2" />
             </div>
             <div>
               <label className="block mb-2 text-sm font-medium">Tags</label>
               <div className="flex flex-wrap gap-2">
                 {TASK_TAGS.map(tag => (
-                  <button key={tag} onClick={() => toggleTag(tag)} className={`px-3 py-1 rounded-full text-sm transition-colors ${formData.tags.includes(tag) ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
+                  <button key={tag} onClick={() => toggleTag(tag)} className={`px-3 py-1 rounded-full text-sm ${formData.tags.includes(tag) ? 'bg-blue-600' : 'bg-slate-700'}`}>
                     {tag.replace('_', ' ')}
                   </button>
                 ))}
               </div>
             </div>
-            <div className="flex gap-3 pt-2">
-              <button onClick={handleSubmit} className="flex-1 bg-blue-600 hover:bg-blue-700 rounded-lg py-2 font-medium transition-colors">Add Task</button>
-              <button onClick={onCancel} className="flex-1 bg-slate-700 hover:bg-slate-600 rounded-lg py-2 font-medium transition-colors">Cancel</button>
+            <div className="flex gap-3">
+              <button onClick={handleSubmit} className="flex-1 bg-blue-600 hover:bg-blue-700 rounded-lg py-2">Add Task</button>
+              <button onClick={onCancel} className="flex-1 bg-slate-700 hover:bg-slate-600 rounded-lg py-2">Cancel</button>
             </div>
           </div>
         </div>
@@ -657,20 +663,20 @@ Completion Count: ${task.completionCount}
       };
       const isOverdue = task.dueAt && task.dueAt < Date.now();
       return (
-        <div className={`bg-slate-800 rounded-lg p-4 border transition-colors ${isOverdue ? 'border-red-500 bg-red-900/10' : 'border-slate-700 hover:border-slate-600'}`}>
+        <div className={`bg-slate-800 rounded-lg p-4 border ${isOverdue ? 'border-red-500' : 'border-slate-700'}`}>
           <div className="flex items-start gap-4">
-            <div className={`${getRankColor(rank)} w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0`}>{rank}</div>
-            <div className="flex-1 min-w-0">
+            <div className={`${getRankColor(rank)} w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm`}>{rank}</div>
+            <div className="flex-1">
               <h3 className="font-semibold text-lg mb-2">{task.title}</h3>
               <div className="flex flex-wrap gap-2 mb-2">
                 {task.tags.map(tag => (
                   <span key={tag} className="bg-slate-700 px-2 py-1 rounded text-xs">{tag.replace('_', ' ')}</span>
                 ))}
               </div>
-              <div className="flex items-center gap-4 text-sm text-slate-400 mb-2">
+              <div className="flex items-center gap-4 text-sm text-slate-400">
                 <span>Urgency: {task.urgency}/5</span>
                 <span>Effort: {task.effortMins}m</span>
-                {task.dueAt && <span className={isOverdue ? 'text-red-400 font-semibold' : ''}>{isOverdue ? '⚠️ OVERDUE' : `Due: ${new Date(task.dueAt).toLocaleString()}`}</span>}
+                {task.dueAt && <span className={isOverdue ? 'text-red-400' : ''}>{isOverdue ? '⚠️ OVERDUE' : `Due: ${new Date(task.dueAt).toLocaleString()}`}</span>}
               </div>
               {showExplanation && task.explanation.length > 0 && (
                 <div className="flex items-center gap-2 flex-wrap mt-2">
@@ -681,14 +687,14 @@ Completion Count: ${task.completionCount}
                 </div>
               )}
             </div>
-            <div className="flex gap-2 flex-shrink-0">
-              <button onClick={() => onDownloadCalendar(task)} className="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors" title="Add to calendar">
+            <div className="flex gap-2">
+              <button onClick={() => onDownloadCalendar(task)} className="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg" title="Calendar">
                 <Calendar className="w-5 h-5" />
               </button>
-              <button onClick={() => onComplete(task.id)} className="p-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors" title="Complete">
+              <button onClick={() => onComplete(task.id)} className="p-2 bg-green-600 hover:bg-green-700 rounded-lg" title="Complete">
                 <Check className="w-5 h-5" />
               </button>
-              <button onClick={() => onDelete(task.id)} className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors" title="Delete">
+              <button onClick={() => onDelete(task.id)} className="p-2 bg-red-600 hover:bg-red-700 rounded-lg" title="Delete">
                 <Trash2 className="w-5 h-5" />
               </button>
             </div>
